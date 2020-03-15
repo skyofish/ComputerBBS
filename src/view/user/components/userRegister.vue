@@ -5,11 +5,11 @@
           <FormItem label="用户名" prop="username">
             <Input v-model="formValidate.username" placeholder="请输入用户名"></Input>
           </FormItem>
-          <FormItem label="邮箱" prop="mail">
-            <Input v-model="formValidate.mail" placeholder="请输入邮箱"></Input>
-          </FormItem>
           <FormItem label="密码" prop="password">
             <Input type="password" v-model="formValidate.password" placeholder="请输入密码"></Input>
+          </FormItem>
+          <FormItem label="邮箱" prop="mail">
+            <Input v-model="formValidate.mail" placeholder="请输入邮箱"></Input>
           </FormItem>
           <FormItem label="号码" prop="phone">
             <Input v-model="formValidate.phone" placeholder="请输入号码"></Input>
@@ -80,10 +80,7 @@
           handleSubmit (name) {
             this.$refs[name].validate((valid) => {
               if (valid) {
-                this.$Message.success('Success!');
                 this.register();
-              } else {
-                this.$Message.error('Fail!');
               }
             })
           },
@@ -96,7 +93,7 @@
             const res = await this.$store.dispatch("register", params)
             console.log(res)
             if(res.data.status == 1000){
-              alert(res.data.message)
+              this.$message.success('注册成功')
               this.$router.push('/login')
             }else{
               alert(res.data.message)

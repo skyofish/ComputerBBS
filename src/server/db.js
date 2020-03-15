@@ -7,11 +7,14 @@ db.on('error', (error) => console.log('Mongo connection error' + error));
 db.once('open', () => console.log('Mongo connection successed'))
 
 const user = require('../models/user')
+const article = require('../models/article')
+const block = require('../models/block')
 
 
 const Models = {
-  Login: user,
-  Register: user,
+  User: user,
+  Article: article,
+  Block: block,
 }
 
 module.exports = Models

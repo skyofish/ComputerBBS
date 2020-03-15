@@ -7,49 +7,56 @@
         </FormItem>
         <FormItem label="版块" prop="block">
           <Select v-model="formValidate.block" placeholder="请选择一个版块">
-            <Option value="beijing">New York</Option>
-            <Option value="shanghai">London</Option>
-            <Option value="shenzhen">Sydney</Option>
+            <Option value="english">英语</Option>
+            <Option value="math">数学</Option>
+            <Option value="politics">政治</Option>
+            <Option value="major">专业课</Option>
+            <Option value="experienceSharing">经验分享</Option>
+            <Option value="chushi">初试</Option>
+            <Option value="fushi">复试</Option>
+            <Option value="guidance">报考指导</Option>
+            <Option value="social">交友</Option>
+            <Option value="others">其他</Option>
           </Select>
         </FormItem>
         <FormItem label="内容" prop="content">
           <Input v-model="formValidate.content" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入内容"></Input>
         </FormItem>
-        <FormItem label="图片" prop="img">
-          <div class="demo-upload-list" v-for="item in uploadList">
-            <template v-if="item.status === 'finished'">
-              <img :src="item.url">
-              <div class="demo-upload-list-cover">
-                <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon>
-                <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
-              </div>
-            </template>
-            <template v-else>
-              <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
-            </template>
-          </div>
-          <Upload
-            ref="upload"
-            :show-upload-list="false"
-            :default-file-list="defaultList"
-            :on-success="handleSuccess"
-            :format="['jpg','jpeg','png']"
-            :max-size="2048"
-            :on-format-error="handleFormatError"
-            :on-exceeded-size="handleMaxSize"
-            :before-upload="handleBeforeUpload"
-            multiple
-            type="drag"
-            action="//jsonplaceholder.typicode.com/posts/"
-            style="display: inline-block;width:58px;">
-            <div style="width: 58px;height:58px;line-height: 58px;">
-              <Icon type="ios-camera" size="20"></Icon>
-            </div>
-          </Upload>
-          <Modal title="View Image" v-model="visible">
-            <img :src="'https://o5wwk8baw.qnssl.com/' + imgName + '/large'" v-if="visible" style="width: 100%">
-          </Modal>
-        </FormItem>
+<!--        <FormItem label="图片" prop="img">-->
+<!--          <div class="demo-upload-list" v-for="item in uploadList">-->
+<!--            <template v-if="item.status === 'finished'">-->
+<!--              <img :src="item.url">-->
+<!--              <div class="demo-upload-list-cover">-->
+<!--                <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon>-->
+<!--                <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>-->
+<!--              </div>-->
+<!--            </template>-->
+<!--            <template v-else>-->
+<!--              <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>-->
+<!--            </template>-->
+<!--          </div>-->
+<!--          <Upload-->
+<!--            ref="upload"-->
+<!--            :show-upload-list="false"-->
+<!--            :default-file-list="defaultList"-->
+<!--            :on-success="handleSuccess"-->
+<!--            :format="['jpg','jpeg','png']"-->
+<!--            :max-size="2048"-->
+<!--            :on-format-error="handleFormatError"-->
+<!--            :on-exceeded-size="handleMaxSize"-->
+<!--            :before-upload="handleBeforeUpload"-->
+<!--            multiple-->
+<!--            type="drag"-->
+<!--            action="//jsonplaceholder.typicode.com/posts/"-->
+<!--            style="display: inline-block;width:58px;">-->
+<!--            <div style="width: 58px;height:58px;line-height: 58px;">-->
+<!--              <Icon type="ios-camera" size="20"></Icon>-->
+<!--            </div>-->
+<!--          </Upload>-->
+<!--          <Modal title="View Image" v-model="visible">-->
+<!--            <img :src="'https://o5wwk8baw.qnssl.com/' + imgName + '/large'" v-if="visible" style="width: 100%">-->
+<!--          </Modal>-->
+<!--        </FormItem>-->
         <FormItem>
           <Button type="primary" @click="handleSubmit('formValidate')">发布</Button>
           <Button @click="handleReset('formValidate')" style="margin-left: 8px">重置</Button>
@@ -59,6 +66,7 @@
 </template>
 
 <script>
+    import { mapState } from  'vuex'
     export default {
       name: "post",
       data () {
@@ -93,9 +101,7 @@
         handleSubmit (name) {
           this.$refs[name].validate((valid) => {
             if (valid) {
-              this.$Message.success('成功!');
-            } else {
-              this.$Message.error('失败!');
+              this.post()
             }
           })
         },
@@ -134,7 +140,23 @@
             });
           }
           return check;
+        },
+        async post() {
+          let params = this.formValidate;
+          params.username = this.username;
+          const res = await this.$store.dispatch("postArticle", params);
+          if(res.data.status == 1000){
+            this.$message.success('发布成功')
+            this.$router.push('/')
+          }else{
+            this.$message.success('发布失败')
+          }
         }
+      },
+      computed: {
+        ...mapState({
+          username: state => state.userInfo.username,
+        })
       }
     }
 </script>

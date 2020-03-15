@@ -8,7 +8,7 @@
             <img src="@images/touxiang.jpg" alt="">
           </router-link>
         </div>
-        <div v-if="!username" class="operate">
+        <div v-if="username" class="operate">
           <p @click="pointShow = true">积分: {{this.point}}</p>
           <Drawer title="Basic Drawer" placement="left" :closable="false" v-model="pointShow">
             <p>Some point...</p>
@@ -22,7 +22,7 @@
             <p>Some exp...</p>
           </Drawer>
           <p>消息</p>
-          <p>退出</p>
+          <p @click="exit()">退出</p>
         </div>
         <div v-else class="operate">
           <router-link to="/userLogin"><p>登录</p></router-link>
@@ -49,30 +49,33 @@
 </template>
 
 <script>
+    import { mapState } from  'vuex'
     export default {
         name: "userAside",
         data() {
           return {
-            username: '',
-            image: '',
-            point: '',
-            exp: '',
-            level: '',
             announce: false,
             pointShow: false,
             expShow: false
           }
         },
         created() {
-          this.getUserInfo();
+
         },
         methods: {
-          getUserInfo() {
-            this.username = 'skyofish';
-            this.point = 300;
-            this.exp = 400;
-            this.level = `Lv${this.exp/100}`;
+          exit() {
+            sessionStorage.removeItem('store');
+            this.$store.commit('setUserInfo', '');
+            window.location.reload();
           }
+        },
+        computed: {
+          ...mapState({
+            username: state => state.userInfo.username,
+            point: state => state.userInfo.point,
+            exp: state => state.userInfo.exp,
+            level: state => state.userInfo ? `Lv${state.userInfo.exp/100 + 1}` : ''
+          })
         }
     }
 </script>

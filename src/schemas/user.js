@@ -1,9 +1,9 @@
-var mongoose = require('mongoose')
+let mongoose = require('mongoose')
 //用于md5加密
-var bcrypt = require('bcryptjs')
+let bcrypt = require('bcryptjs')
 //加盐数
-var SALT_WORK_FACTOR = 10
-var UserSchema = new mongoose.Schema({
+let SALT_WORK_FACTOR = 10
+let UserSchema = new mongoose.Schema({
   username: {
     unique: true,
     type: String
@@ -13,6 +13,9 @@ var UserSchema = new mongoose.Schema({
   phone: String,
   birth: String,
   gender: String,
+  point: Number,
+  exp: Number,
+  desc: String,
   meta: {
     createAt: {
       type: Date,
@@ -26,7 +29,7 @@ var UserSchema = new mongoose.Schema({
 });
 //对密码进行加密
 UserSchema.pre('save', function (next) {
-  var user = this
+  let user = this
   if (this.isNew) {
     this.createAt = this.updateAt = Date.now()
   }

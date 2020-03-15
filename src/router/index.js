@@ -46,6 +46,16 @@ export default new Router({
           name: 'post',
           component: () => import('../view/user/components/post.vue')
         },
+        {
+          path: 'articleDetail',
+          name: 'articleDetail',
+          component: () => import('../view/admin/components/articleDetail.vue')
+        },
+        {
+          path: 'articleList',
+          name: 'articleList',
+          component: () => import('../view/user/components/articleList.vue')
+        }
       ]
     },
     {
@@ -105,9 +115,9 @@ export default new Router({
           component: () => import('../view/admin/components/updateLog.vue')
         },
         {
-          path: 'postDetail',
-          name: 'postDetail',
-          component: () => import('../view/admin/components/postDetail.vue')
+          path: 'articleDetail',
+          name: 'articleDetail',
+          component: () => import('../view/admin/components/articleDetail.vue')
         },
       ]
     },

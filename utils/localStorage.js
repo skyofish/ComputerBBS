@@ -1,4 +1,4 @@
-const KEY = 'webchat';
+const KEY = 'skyofish';
 const localStorage = window.localStorage;
 let storeStorage;
 
@@ -35,12 +35,8 @@ export function getItem(key) {
   return false;
 }
 
-export function setItem(key, value, duration = Number.MAX_SAFE_INTEGER) {
-  storeStorage[key] = {
-    value,
-    duration,
-    time: Date.now()
-  };
+export function setItem(key, value) {
+  storeStorage[key] = {value};
   store();
 }
 

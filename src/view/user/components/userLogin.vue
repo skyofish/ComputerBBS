@@ -45,10 +45,7 @@
         handleSubmit(name) {
           this.$refs[name].validate((valid) => {
             if (valid) {
-              this.$Message.success('成功!');
               this.login();
-            } else {
-              this.$Message.error('失败!');
             }
           })
         },
@@ -57,7 +54,11 @@
           const res = await this.$store.dispatch("login", params)
           console.log(res)
           if (res.data.status == 1000) {
-            alert(res.data.message)
+            this.$Message.success('成功!');
+            const userInfo = res.data.data;
+            console.log(res.data.data)
+            this.$store.commit('setUserInfo', userInfo)
+            sessionStorage.setItem("store",JSON.stringify(this.$store.state))
             this.$router.push('/')
           } else {
             alert(res.data.message)
