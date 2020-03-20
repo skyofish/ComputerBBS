@@ -15,8 +15,8 @@
           <FormItem label="号码" prop="phone">
             <Input v-model="formValidate.phone" placeholder="请输入号码"></Input>
           </FormItem>
-          <FormItem label="日期" prop="date" style="text-align: left">
-            <DatePicker type="date" placeholder="Select date" v-model="formValidate.date"></DatePicker>
+          <FormItem label="生日" prop="birth" style="text-align: left">
+            <DatePicker type="date" placeholder="Select date" v-model="formValidate.birth"></DatePicker>
           </FormItem>
           <FormItem label="性别" prop="gender" style="text-align: left">
             <RadioGroup v-model="formValidate.gender">
@@ -37,18 +37,20 @@
 </template>
 
 <script>
+    import { mapState } from  'vuex'
     export default {
         name: "personalInfo",
         data() {
           return {
             formValidate: {
-              username: 'skyofish',
-              mail: '2222@qq.com',
-              phone: '1111111111',
-              gender: 'male',
-              date: '2020-3-10',
-              desc: '人在塔在',
-              password: '2222222222'
+              username: '',
+              mail: '',
+              phone: '',
+              gender: '',
+              date: '',
+              desc: '',
+              password: '',
+              avatar: ''
             },
             ruleValidate: {
               username: [
@@ -68,37 +70,59 @@
                 { required: true, message: '请选择性别', trigger: 'change' }
               ],
               date: [
-                { required: true, type: 'date', message: '请选择日期', trigger: 'change' }
+                { required: true, type: 'date', message: '请选择生日', trigger: 'change' }
               ],
               desc: [
                 { required: true, message: '请输入个人介绍', trigger: 'blur' },
-                { type: 'string', min: 20, message: '介绍不得少于10个字', trigger: 'blur' }
+                { type: 'string', min: 10, message: '介绍不得少于10个字', trigger: 'blur' }
               ]
             }
           }
         },
         created() {
-          this.getUserInfo();
+          //在页面加载时读取sessionStorage里的状态信息
+          if (sessionStorage.getItem("store") ) {
+            this.$store.replaceState(Object.assign({}, this.$store.state,JSON.parse(sessionStorage.getItem("store"))))
+          }
+
+          //在页面刷新时将vuex里的信息保存到sessionStorage里
+          window.addEventListener("beforeunload",()=>{
+            sessionStorage.setItem("store",JSON.stringify(this.$store.state))
+          })
+          this.formValidate = this.userInfo
         },
         methods: {
-          getUserInfo() {
-
-          },
           handleSubmit (name) {
             this.$refs[name].validate((valid) => {
               if (valid) {
-                this.$Message.success('Success!');
-              } else {
-                this.$Message.error('Fail!');
+                this.updatePersonalInfo()
               }
             })
           },
           handleReset (name) {
             this.$refs[name].resetFields();
           },
+          async updatePersonalInfo() {
+            let params = this.formValidate;
+            console.log(params)
+            const res = await this.$store.dispatch("updatePersonalInfo", params);
+            if(res.data.status == 1000){
+              this.$message.success('修改成功')
+              const userInfo = res.data.data;
+              this.$store.commit('setUserInfo', userInfo)
+              sessionStorage.setItem("store",JSON.stringify(this.$store.state))
+            }else{
+              this.$message.success('修改失败')
+            }
+          },
           back() {
             this.$router.go(-1)
           }
+        },
+        computed: {
+          ...mapState({
+            userInfo: state => state.userInfo
+          })
         }
     }
 </script>
@@ -113,12 +137,12 @@
 
     .content {
       width: 50%;
-      margin: 10% auto 20px;
+      margin: 2% auto 20px;
       font-size: 16px;
 
       img {
-        width: 150px;
-        height: 150px;
+        width: 100px;
+        height: 100px;
         -webkit-border-radius: 50%;
         -moz-border-radius: 50%;
         border-radius: 50%;

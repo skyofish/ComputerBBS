@@ -7,56 +7,48 @@
         </FormItem>
         <FormItem label="版块" prop="block">
           <Select v-model="formValidate.block" placeholder="请选择一个版块">
-            <Option value="english">英语</Option>
-            <Option value="math">数学</Option>
-            <Option value="politics">政治</Option>
-            <Option value="major">专业课</Option>
-            <Option value="experienceSharing">经验分享</Option>
-            <Option value="chushi">初试</Option>
-            <Option value="fushi">复试</Option>
-            <Option value="guidance">报考指导</Option>
-            <Option value="social">交友</Option>
-            <Option value="others">其他</Option>
+            <Option v-for="i in block" :key="i._id" :value="i.blockName">{{i.name}}</Option>
           </Select>
         </FormItem>
         <FormItem label="内容" prop="content">
           <Input v-model="formValidate.content" type="textarea" :autosize="{minRows: 2,maxRows: 5}" placeholder="请输入内容"></Input>
         </FormItem>
-<!--        <FormItem label="图片" prop="img">-->
-<!--          <div class="demo-upload-list" v-for="item in uploadList">-->
-<!--            <template v-if="item.status === 'finished'">-->
-<!--              <img :src="item.url">-->
-<!--              <div class="demo-upload-list-cover">-->
-<!--                <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon>-->
-<!--                <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>-->
-<!--              </div>-->
-<!--            </template>-->
-<!--            <template v-else>-->
-<!--              <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>-->
-<!--            </template>-->
-<!--          </div>-->
-<!--          <Upload-->
-<!--            ref="upload"-->
-<!--            :show-upload-list="false"-->
-<!--            :default-file-list="defaultList"-->
-<!--            :on-success="handleSuccess"-->
-<!--            :format="['jpg','jpeg','png']"-->
-<!--            :max-size="2048"-->
-<!--            :on-format-error="handleFormatError"-->
-<!--            :on-exceeded-size="handleMaxSize"-->
-<!--            :before-upload="handleBeforeUpload"-->
-<!--            multiple-->
-<!--            type="drag"-->
-<!--            action="//jsonplaceholder.typicode.com/posts/"-->
-<!--            style="display: inline-block;width:58px;">-->
-<!--            <div style="width: 58px;height:58px;line-height: 58px;">-->
-<!--              <Icon type="ios-camera" size="20"></Icon>-->
-<!--            </div>-->
-<!--          </Upload>-->
-<!--          <Modal title="View Image" v-model="visible">-->
-<!--            <img :src="'https://o5wwk8baw.qnssl.com/' + imgName + '/large'" v-if="visible" style="width: 100%">-->
-<!--          </Modal>-->
-<!--        </FormItem>-->
+        <FormItem label="图片" prop="img">
+          <div class="demo-upload-list" v-for="item in uploadList">
+            <template v-if="item.status === 'finished'">
+              <img :src="item.url">
+              <div class="demo-upload-list-cover">
+                <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon>
+                <Icon type="ios-trash-outline" @click.native="handleRemove(item)"></Icon>
+              </div>
+            </template>
+            <template v-else>
+              <Progress v-if="item.showProgress" :percent="item.percentage" hide-info></Progress>
+            </template>
+          </div>
+          <Upload
+            ref="upload"
+            :show-upload-list="false"
+            :default-file-list="defaultList"
+            :on-success="handleSuccess"
+            :on-remove="handleRemove"
+            :format="['jpg','jpeg','png']"
+            :max-size="2048"
+            :on-format-error="handleFormatError"
+            :on-exceeded-size="handleMaxSize"
+            :before-upload="handleBeforeUpload"
+            multiple
+            type="drag"
+            action="/api/upload/image"
+            style="display: inline-block;width:58px;">
+            <div style="width: 58px;height:58px;line-height: 58px;">
+              <Icon type="ios-camera" size="20"></Icon>
+            </div>
+          </Upload>
+          <Modal title="View Image" v-model="visible">
+            <img :src="imgName" v-if="visible" style="width: 100%">
+          </Modal>
+        </FormItem>
         <FormItem>
           <Button type="primary" @click="handleSubmit('formValidate')">发布</Button>
           <Button @click="handleReset('formValidate')" style="margin-left: 8px">重置</Button>
@@ -75,6 +67,7 @@
             title: '',
             block: '',
             content: '',
+            images: []
           },
           ruleValidate: {
             title: [
@@ -91,11 +84,15 @@
           defaultList: [],
           imgName: '',
           visible: false,
-          uploadList: []
+          uploadList: [],
+          block : []
         }
       },
       mounted () {
         this.uploadList = this.$refs.upload.fileList;
+      },
+      created() {
+        this.getBlock()
       },
       methods: {
         handleSubmit (name) {
@@ -117,8 +114,9 @@
           this.$refs.upload.fileList.splice(fileList.indexOf(file), 1);
         },
         handleSuccess (res, file) {
-          file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
-          file.name = '7eb99afb9d5f317c912f08b5212fd69a';
+          file.url = res.data
+          file.name = res.data
+          this.formValidate.images.push(res.data)
         },
         handleFormatError (file) {
           this.$Notice.warning({
@@ -143,13 +141,21 @@
         },
         async post() {
           let params = this.formValidate;
-          params.username = this.username;
+          params.author = this.username;
           const res = await this.$store.dispatch("postArticle", params);
           if(res.data.status == 1000){
             this.$message.success('发布成功')
             this.$router.push('/')
           }else{
             this.$message.success('发布失败')
+          }
+        },
+        async getBlock() {
+          const res = await this.$store.dispatch("getBlockList");
+          if (res.data.status == 1000) {
+            this.block = res.data.data
+          } else {
+            this.$message.error("未找到任何版块");
           }
         }
       },

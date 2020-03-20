@@ -9,12 +9,16 @@ db.once('open', () => console.log('Mongo connection successed'))
 const user = require('../models/user')
 const article = require('../models/article')
 const block = require('../models/block')
+const file = require('../models/file')
+const announcement = require('../models/announcement')
 
 
 const Models = {
   User: user,
   Article: article,
   Block: block,
+  File: file,
+  Announcement: announcement
 }
 
 module.exports = Models

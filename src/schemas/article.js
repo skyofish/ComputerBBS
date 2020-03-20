@@ -2,10 +2,24 @@ let mongoose = require('mongoose')
 
 let ArticleSchema = new mongoose.Schema({
   title: String,
+  author: String,
+  isCheck: {
+    type: Boolean,
+    default: false
+  },
+  isTop: {
+    type: Boolean,
+    default: false
+  },
   block: String,
   content: String,
   score: Number,
-  isElite: Boolean,
+  like: Number,
+  images: Array,
+  isElite: {
+    type: Boolean,
+    default: false
+  },
   comment: [
     {
       username: String,

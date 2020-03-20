@@ -34,16 +34,8 @@
           </el-table-column>
         </el-table>
       </div>
-      <div class="block">
-        <el-pagination
-          align="right"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page.sync="currentPage3"
-          :page-size="100"
-          layout="prev, pager, next, jumper"
-          :total="1000">
-        </el-pagination>
+      <div class="page">
+        <Page :total="total" @on-page-size-change="changePageSize" @on-change="changePage" :current="current" :page-size="pageSize" show-total show-elevator show-sizer />
       </div>
     </div>
 </template>
@@ -53,7 +45,11 @@
       name: "postManage",
       data() {
         return {
-          postData: []
+          articleList: [],
+          total: 0,
+          current: 1,
+          pageSize: 10,
+          isLike: []
         }
       },
       created() {
@@ -66,17 +62,14 @@
         handleAdd(index, row) {
           console.log(index, row);
         },
-        getPost() {
-          for(let i = 1; i <= 10; i++) {
-            this.postData.push(
-              {
-                date: '2016-05-02',
-                username: `用户${i}`,
-                id: i,
-                block: `版块${i}`,
-                title: '震惊震惊震惊震惊震惊震惊震惊'
-              }
-            )
+        async getPost() {
+          let params = {current: this.current, pageSize: this.pageSize};
+          const res = await this.$store.dispatch("getArticleList", params)
+          if (res.data.status == 1000) {
+            this.articleList = res.data.data
+            this.total = res.data.count
+          } else {
+            this.$Message.warning(res.data.message)
           }
         }
       }
@@ -92,8 +85,11 @@
       height: 80px;
       line-height: 80px;
     }
-    .block {
-      padding-right: 20px;
+    .page {
+      margin: 20px;
+      padding-bottom: 50px;
+      text-align: right;
+      line-height: 0;
     }
   }
 </style>

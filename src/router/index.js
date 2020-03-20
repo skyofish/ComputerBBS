@@ -48,7 +48,7 @@ export default new Router({
         },
         {
           path: 'articleDetail',
-          name: 'articleDetail',
+          name: 'userArticleDetail',
           component: () => import('../view/admin/components/articleDetail.vue')
         },
         {
@@ -116,7 +116,7 @@ export default new Router({
         },
         {
           path: 'articleDetail',
-          name: 'articleDetail',
+          name: 'adminArticleDetail',
           component: () => import('../view/admin/components/articleDetail.vue')
         },
       ]

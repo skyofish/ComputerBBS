@@ -8,6 +8,11 @@ let UserSchema = new mongoose.Schema({
     unique: true,
     type: String
   },
+  type: {
+    type: String,
+    default: 'user'
+  },
+  avatar: String,
   password: String,
   mail: String,
   phone: String,

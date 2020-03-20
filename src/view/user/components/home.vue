@@ -37,10 +37,10 @@
       </div>
       <div class="block">
         <p>板块专区</p>
-        <div class="block-card" v-for="i in block">
+        <div class="block-card" @click="toArticleList(i.blockName)" :key="i.blockName" v-for="i in block">
           <Card shadow>
-            <p slot="title">{{i.title}}</p>
-            <p>{{i.moderator}}</p>
+            <p slot="title">{{i.name}}</p>
+            <p>版主:{{i.moderator.join('\n')}}</p>
           </Card>
         </div>
       </div>
@@ -67,10 +67,23 @@
               this.hotArticle.push({id: i, title: i})
             }
           },
-          getBlock() {
-            for(let i = 1; i <= 10; i++) {
-              this.block.push({id: i, title: i, moderator: i})
+          async getBlock() {
+            const res = await this.$store.dispatch("getBlockList");
+            if (res.data.status == 1000) {
+              this.block = res.data.data
+            } else {
+              this.$message.error("未找到任何版块");
             }
+          },
+          toArticleList(blockName) {
+            this.$store.commit('setBlockName', blockName)
+            sessionStorage.setItem("store",JSON.stringify(this.$store.state))
+            this.$router.push({
+              name: 'articleList',
+              params: {
+                blockName: blockName
+              }
+            });
           }
         }
     }
@@ -137,6 +150,13 @@
       width: 45%;
       display: inline-block;
       margin: 20px 20px;
+      cursor: pointer;
+    }
+    .block-card:hover /deep/ .ivu-card {
+      background: #2D8cF0;
+      p {
+        color: white;
+      }
     }
   }
 </style>

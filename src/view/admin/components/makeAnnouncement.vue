@@ -8,6 +8,7 @@
           v-model="input"
           clearable>
         </el-input>
+        <Button size="large" type="primary">发布</Button>
       </div>
     </div>
 </template>
