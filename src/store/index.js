@@ -116,6 +116,10 @@ const store = new Vuex.Store({
       const res = await api.userLock(data)
       return res
     },
+    async moderatorRequest({commit}, data) {
+      const res = await api.moderatorRuquest(data)
+      return res
+    },
     async moderatorSuccess({commit}, data) {
       const res = await api.moderatorSuccess(data)
       return res

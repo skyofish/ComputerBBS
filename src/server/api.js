@@ -42,6 +42,8 @@ const Service = {
   userList: data => Axios.post('/api/user/list', data),
   // 用户封禁接口
   userLock: data => Axios.post('/api/user/lock', data),
+  // 用户申请版主接口
+  moderatorRuquest: data => Axios.post('/api/user/moderator', data),
   // 用户审核版主通过接口
   moderatorSuccess: data => Axios.post('/api/user/moderatorSuccess', data),
   // 用户审核版主失败接口

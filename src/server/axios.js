@@ -1,12 +1,36 @@
 import axios from 'axios'
 import router from "../router";
 import store from "../store";
-const baseURL = '';
+import ViewUI from 'view-design';
+// const baseURL = 'localhost:8080/#/';
 const instance = axios.create();
 instance.defaults.timeout = 30000; // 所有接口30s超时
 
 router.beforeEach((to, from, next) => {
-  next()
+  let username
+  if (sessionStorage.store) {
+    username = JSON.parse(sessionStorage.store).userInfo.username
+  }
+  if (!username) {
+    if (to.path == '/user/chatRoom' || to.path == '/user/post' || to.path == '/user/learningResource' || to.path == '/user/teachingVideo' || to.path == '/user/dataStatistics' || to.path == '/personalInfo' || to.path == '/user/chat') {
+      ViewUI.Message.error('请先登录')
+      next({
+        name: 'userLogin',
+      })
+    } else {
+      next()
+    }
+  } else {
+    let type = JSON.parse(sessionStorage.store).userInfo.type
+    if (type == 'user' && to.path == '/admin/dataStatistics') {
+      ViewUI.Message.error('没有权限')
+      next({
+        name: 'user',
+      })
+    } else {
+      next()
+    }
+  }
 })
 
 // // 请求统一处理

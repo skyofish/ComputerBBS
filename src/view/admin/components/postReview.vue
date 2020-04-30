@@ -5,18 +5,29 @@
         :data="reviewData"
         style="width: 100%; padding: 40px;">
         <el-table-column
-          prop="date"
+          prop="_id"
+          label="编号">
+          <template slot-scope="scope">
+            <p @click="toArticleDetail(scope.row._id)">{{ scope.row._id }}</p>
+          </template>
+        </el-table-column>
+        <el-table-column
+          prop="meta.createAt"
           label="日期">
         </el-table-column>
         <el-table-column
-          prop="username"
+          prop="author"
+          width="100px"
+          show-overflow-tooltip
           label="姓名">
         </el-table-column>
         <el-table-column
           prop="title"
+          show-overflow-tooltip
           label="标题">
         </el-table-column>
         <el-table-column
+          width="100px"
           prop="block"
           label="版块">
         </el-table-column>
@@ -34,26 +45,22 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="block">
-      <el-pagination
-        align="right"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="currentPage3"
-        :page-size="100"
-        layout="prev, pager, next, jumper"
-        :total="1000">
-      </el-pagination>
+    <div class="page">
+      <Page :total="total" @on-page-size-change="changePageSize" @on-change="changePage" :current="current" :page-size="pageSize" show-total show-elevator show-sizer />
     </div>
   </div>
 </template>
 
 <script>
+  import { mapState } from  'vuex'
   export default {
     name: "postReview",
     data() {
       return {
-        reviewData: []
+        reviewData: [],
+        total: 0,
+        current: 1,
+        pageSize: 10,
       }
     },
     created() {
@@ -62,23 +69,59 @@
     methods: {
       handleFail(index, row) {
         console.log(index, row);
+        let b = (index, row)
+        this.remove(b._id)
       },
       handleSuccess(index, row) {
         console.log(index, row);
+        let a = (index, row)
+        this.check(a._id)
       },
-      getPost() {
-        for(let i = 1; i <= 10; i++) {
-          this.reviewData.push(
-            {
-              date: '2016-05-02',
-              username: `用户${i}`,
-              id: i,
-              block: `版块${i}`,
-              title: '震惊震惊震惊震惊震惊震惊震惊'
-            }
-          )
+      changePage(index) {
+        this.current = index
+        this.getPost()
+      },
+      changePageSize(index) {
+        this.pageSize = index
+        this.getPost()
+      },
+      async getPost() {
+        let params = {username: this.userInfo.username, user: this.userInfo.type, operate: 'check', current: this.current, pageSize: this.pageSize};
+        const res = await this.$store.dispatch("getArticleList", params)
+        if (res.data.status == 1000) {
+          this.reviewData = res.data.data
+          this.total = res.data.count
+        } else {
+          this.$Message.warning(res.data.message)
         }
-      }
+      },
+      async check(id) {
+        let params = {articleId: id};
+        const res = await this.$store.dispatch("articleCheck", params)
+        if (res.data.status == 1000) {
+          this.getPost()
+        }
+      },
+      async remove(id) {
+        let params = {articleId: id};
+        const res = await this.$store.dispatch("articleRemove", params)
+        if (res.data.status == 1000) {
+          this.getPost()
+        }
+      },
+      toArticleDetail(id) {
+        this.$router.push({
+          path: 'articleDetail',
+          query: {
+            id: id,
+          }
+        });
+      },
+    },
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      })
     }
   }
 </script>
@@ -92,8 +135,15 @@
       height: 80px;
       line-height: 80px;
     }
-    .block {
-      padding-right: 20px;
+
+    #table /deep/ .cell p {
+      cursor: pointer;
+    }
+    .page {
+      margin: 20px;
+      padding-bottom: 50px;
+      text-align: right;
+      line-height: 0;
     }
   }
 </style>

@@ -1,11 +1,11 @@
 <template>
     <div>
-      <div class="banner">banner</div>
+      <div class="banner"><img src="../../../static/banner.jpg" alt=""></div>
       <div>
         <el-container>
           <el-header>
             <div class="search">
-              <Input search enter-button placeholder="请输入搜索关键词"/>
+              <Input @on-enter="toArticleDetail" v-model="search" search enter-button placeholder="请输入搜索关键词"/>
             </div>
             <div>
               <Menu mode="horizontal" active-name="1">
@@ -55,8 +55,18 @@
         name: "user",
         data() {
           return {
-
+            search: ''
           }
+        },
+        methods: {
+          toArticleDetail() {
+            this.$router.push({
+              path: 'articleDetail',
+              query: {
+                title: this.search,
+              }
+            });
+          },
         },
         created() {
           //在页面加载时读取sessionStorage里的状态信息
@@ -107,7 +117,11 @@
 
   .banner {
     width: 100%;
-    height: 25%;
+    height: 200px;
     line-height: 150px;
+    img {
+      width: 100%;
+      height: 200px;
+    }
   }
 </style>

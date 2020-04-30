@@ -4,7 +4,7 @@
         <p>热门</p>
         <hr/>
         <ul>
-          <li v-for="i in hotArticle">
+          <li @click="toArticleDetail(i._id)" v-for="i in hotArticle">
             {{i.title}}
           </li>
         </ul>
@@ -62,9 +62,13 @@
           this.getBlock();
         },
         methods: {
-          getHotArticle() {
-            for(let i = 1; i <= 10; i++) {
-              this.hotArticle.push({id: i, title: i})
+          async getHotArticle() {
+            let params = {operate: 'hot'}
+            const res =await this.$store.dispatch('getArticleList', params)
+            if (res.data.status == 1000) {
+              this.hotArticle = res.data.data
+            } else {
+              this.$message.error("未找到任何热门文章");
             }
           },
           async getBlock() {
@@ -84,7 +88,15 @@
                 blockName: blockName
               }
             });
-          }
+          },
+          toArticleDetail(id) {
+            this.$router.push({
+              path: 'articleDetail',
+              query: {
+                id: id,
+              }
+            });
+          },
         }
     }
 </script>
@@ -108,6 +120,7 @@
     ul{
       list-style-type: none;
       li {
+        cursor: pointer;
         text-align: left;
         background: white;
         font-size: 14px;

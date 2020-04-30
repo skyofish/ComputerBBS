@@ -8,7 +8,7 @@
           v-model="input"
           clearable>
         </el-input>
-        <Button size="large" type="primary">发布</Button>
+        <Button @click="announce" style="margin-top: 20px" size="large" type="primary">发布</Button>
       </div>
     </div>
 </template>
@@ -19,6 +19,16 @@
         data() {
           return {
             input: ''
+          }
+        },
+        methods : {
+          async announce() {
+            let params = {content: this.input}
+            const res = await this.$store.dispatch('makeAnnouncement', params)
+            if (res.data.status == '1000') {
+              this.$Message.success('发布成功')
+              this.input = ''
+            }
           }
         }
     }

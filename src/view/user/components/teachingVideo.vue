@@ -1,9 +1,27 @@
 <template>
     <div class="teachingVideo">
+      <div class="video">
+        <p>算数逻辑单元</p>
+        <video width="400" height="300" controls>
+          <source src="../../../movie/video.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="video">
+        <p>二进制</p>
+        <video width="400" height="300" controls>
+          <source src="../../../movie/video(1).mp4" type="video/mp4">
+        </video>
+      </div>
       <div class="video" v-for="i in teachingVideo">
         <p>{{i.title}}</p>
         <video width="400" height="300" controls>
-          <source :ref="i.ref" :src="i.src" type="video/mp4">
+          <source :src="i.src" type="video/mp4">
+        </video>
+      </div>
+      <div class="video" v-for="i in teachingVideo">
+        <p>{{i.title}}</p>
+        <video width="400" height="300" controls>
+          <source :src="i.src" type="video/mp4">
         </video>
       </div>
       <div class="page">
@@ -22,9 +40,6 @@
         },
         created() {
           this.getTeachingVideo();
-          for(let i = 1; i <= 10; i++) {
-            this.$refs.video[i].src = '@/movie/movie.mp4';
-          }
         },
         methods: {
           getTeachingVideo() {
@@ -34,7 +49,7 @@
                   id: i,
                   title:  `title ${i}`,
                   ref: 'video',
-                  src: '@/movie/movie.mp4',
+                  src: '../../../../movie/movie.mp4',
                 }
               )
             }

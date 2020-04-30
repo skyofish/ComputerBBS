@@ -4,20 +4,20 @@
         <el-timeline>
           <el-timeline-item timestamp="2018/4/12" placement="top">
             <el-card>
-              <h4>更新 Github 模板</h4>
-              <p>王小虎 提交于 2018/4/12 20:46</p>
+              <h4>1.0</h4>
+              <p>搭建整体结构</p>
             </el-card>
           </el-timeline-item>
           <el-timeline-item timestamp="2018/4/3" placement="top">
             <el-card>
-              <h4>更新 Github 模板</h4>
-              <p>王小虎 提交于 2018/4/3 20:46</p>
+              <h4>2.0</h4>
+              <p>完成帖子管理功能</p>
             </el-card>
           </el-timeline-item>
           <el-timeline-item timestamp="2018/4/2" placement="top">
             <el-card>
-              <h4>更新 Github 模板</h4>
-              <p>王小虎 提交于 2018/4/2 20:46</p>
+              <h4>3.0</h4>
+              <p>完成用户管理功能</p>
             </el-card>
           </el-timeline-item>
         </el-timeline>

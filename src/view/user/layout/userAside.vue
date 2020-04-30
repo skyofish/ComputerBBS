@@ -47,15 +47,27 @@
               <Button type="primary" size="large" @click="uploadOk('formValidate')">确定</Button>
             </div>
           </Modal>
+          <p @click="toMyArticle">我的帖子</p>
           <p @click="blockRequest = true">申请版主</p>
           <Modal
             v-model="blockRequest"
             title="申请版主"
             @on-ok="blockOk"
             @on-cancel="blockCancel">
-            <p>Content of dialog</p>
-            <p>Content of dialog</p>
-            <p>Content of dialog</p>
+            <Form ref="moderator" :model="moderator" :label-width="80">
+              <FormItem label="版块" prop="block">
+                <Select v-model="moderator.block" placeholder="请选择一个版块">
+                  <Option v-for="i in block" :key="i._id" :value="i.name">{{i.name}}</Option>
+                </Select>
+              </FormItem>
+              <FormItem label="理由" prop="reason">
+                <Input v-model="moderator.reason" placeholder="请输入申请理由"></Input>
+              </FormItem>
+            </Form>
+            <div slot="footer">
+              <Button type="text" size="large" @click="moderatorCancel">取消</Button>
+              <Button type="primary" size="large" @click="moderatorOk('moderator')">确定</Button>
+            </div>
           </Modal>
           <p @click="exit()">退出</p>
         </div>
@@ -74,10 +86,13 @@
         </Button>
         <br/>
         <Button icon="md-notifications" @click="announce = true">公告</Button>
-        <Drawer title="Basic Drawer" placement="left" :closable="false" v-model="announce">
-          <p>Some contents...</p>
-          <p>Some contents...</p>
-          <p>Some contents...</p>
+        <Drawer title="公告" placement="left" :closable="false" v-model="announce">
+          <Timeline>
+            <TimelineItem :key="i._id" v-for="i in announcement">
+              <p class="time">{{i.createDate}}</p>
+              <p class="content">{{i.content}}</p>
+            </TimelineItem>
+          </Timeline>
         </Drawer>
       </div>
     </div>
@@ -94,10 +109,16 @@
             expShow: false,
             blockRequest: false,
             uploadFile: false,
+            block: [],
+            announcement: [],
             formValidate: {
               title: '',
               file: [],
               score: ''
+            },
+            moderator: {
+              block: '',
+              reason: '',
             },
             ruleValidate: {
               title: [
@@ -116,7 +137,8 @@
           }
         },
         created() {
-
+          this.getBlock()
+          this.getAnnounceList()
         },
         methods: {
           exit() {
@@ -136,6 +158,22 @@
                 this.upload()
               }
             })
+          },
+          async moderatorOk () {
+            let params = this.moderator;
+            params.username = this.username
+            params.id = this.id
+            const res = await this.$store.dispatch("moderatorRequest", params)
+            if(res.data.status == 1000){
+              this.$message.success('申请成功')
+              this.blockRequest = false
+            }else{
+              this.$message.error('上传失败')
+            }
+          },
+          moderatorCancel () {
+            this.blockRequest = false
+            this.$Message.info('上传取消');
           },
           async upload() {
             let params = this.formValidate;
@@ -168,6 +206,30 @@
               desc: 'File  ' + file.name + ' is too large, no more than 2M.'
             });
           },
+          async getBlock() {
+            const res = await this.$store.dispatch("getBlockList");
+            if (res.data.status == 1000) {
+              this.block = res.data.data
+            } else {
+              this.$message.error("未找到任何版块");
+            }
+          },
+          async getAnnounceList() {
+            const res = await this.$store.dispatch('getAnnouncement');
+            if (res.data.status == 1000) {
+              this.announcement = res.data.data
+            } else {
+              this.$message.error("未找到公告");
+            }
+          },
+          toMyArticle() {
+            this.$router.push({
+              path: 'articleList',
+              query: {
+                myArticle: true,
+              }
+            });
+          }
         },
         computed: {
           ...mapState({
@@ -187,6 +249,13 @@
     width: 100%;
     height: 100%;
     padding: 30px 20px 40px 60px;
+  }
+  .time{
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .content{
+    padding-left: 5px;
   }
   .userInfo {
     width: 100%;

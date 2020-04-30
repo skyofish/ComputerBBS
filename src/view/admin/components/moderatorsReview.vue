@@ -5,11 +5,7 @@
         :data="moderatorData"
         style="width: 100%; padding: 40px;">
         <el-table-column
-          prop="id"
-          label="编号">
-        </el-table-column>
-        <el-table-column
-          prop="requestDate"
+          prop="moderatorDate"
           label="申请日期">
         </el-table-column>
         <el-table-column
@@ -17,11 +13,11 @@
           label="用户名">
         </el-table-column>
         <el-table-column
-          prop="block"
+          prop="moderatorBlock"
           label="版块">
         </el-table-column>
         <el-table-column
-          prop="reason"
+          prop="moderatorReason"
           label="理由">
         </el-table-column>
         <el-table-column
@@ -38,51 +34,75 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="block">
-      <el-pagination
-        align="right"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="currentPage3"
-        :page-size="100"
-        layout="prev, pager, next, jumper"
-        :total="1000">
-      </el-pagination>
+    <div class="page">
+      <Page :total="total" @on-page-size-change="changePageSize" @on-change="changePage" :current="current" :page-size="pageSize" show-total show-elevator show-sizer />
     </div>
   </div>
 </template>
 
 <script>
+  import { mapState } from  'vuex'
   export default {
     name: "moderatorReview",
     data() {
       return {
-        moderatorData: []
+        moderatorData: [],
+        total: 0,
+        current: 1,
+        pageSize: 10,
       }
     },
     created() {
-      this.getPost()
+      this.getModerator()
     },
     methods: {
       handleFail(index, row) {
         console.log(index, row);
+        let b = (index, row)
+        this.remove(b._id)
       },
       handleSuccess(index, row) {
         console.log(index, row);
+        let a = (index, row)
+        this.check(a._id, a.moderatorBlock, a.username)
       },
-      getPost() {
-        for(let i = 1; i <= 10; i++) {
-          this.moderatorData.push(
-            {
-              requestDate: '2016-05-02',
-              username: `用户${i}`,
-              id: i,
-              block: `版块${i}`,
-              reason: '震惊震惊震惊震惊震惊震惊震惊'
-            }
-          )
+      changePage(index) {
+        this.current = index
+        this.getModerator()
+      },
+      changePageSize(index) {
+        this.pageSize = index
+        this.getModerator()
+      },
+      async getModerator() {
+        let params = {type: 'check', current: this.current, pageSize: this.pageSize};
+        const res = await this.$store.dispatch("userList", params)
+        if (res.data.status == 1000) {
+          this.moderatorData = res.data.data
+          this.total = res.data.count
+        } else {
+          this.$Message.warning(res.data.message)
         }
-      }
+      },
+      async check(id, block, username) {
+        let params = {id: id, block: block, username: username};
+        const res = await this.$store.dispatch("moderatorSuccess", params)
+        if (res.data.status == 1000) {
+          this.getModerator()
+        }
+      },
+      async remove(id) {
+        let params = {id: id};
+        const res = await this.$store.dispatch("moderatorFail", params)
+        if (res.data.status == 1000) {
+          this.getModerator()
+        }
+      },
+    },
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      })
     }
   }
 </script>
@@ -96,8 +116,11 @@
       height: 80px;
       line-height: 80px;
     }
-    .block {
-      padding-right: 20px;
+    .page {
+      margin: 20px;
+      padding-bottom: 50px;
+      text-align: right;
+      line-height: 0;
     }
   }
 </style>

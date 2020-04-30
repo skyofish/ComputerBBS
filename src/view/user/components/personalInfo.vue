@@ -1,7 +1,7 @@
 <template>
     <div class="personalInfo">
       <div class="content">
-        <img src="@images/touxiang3.jpg" alt="">
+        <img :src="userInfo.avatar" alt="">
         <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
           <FormItem label="用户名" prop="username">
             <Input v-model="formValidate.username" placeholder="请输入用户名"></Input>

@@ -12,6 +12,13 @@ let UserSchema = new mongoose.Schema({
     type: String,
     default: 'user'
   },
+  isModerator: {
+    type: Boolean,
+    default: false
+  },
+  moderatorBlock: String,
+  moderatorReason: String,
+  moderatorDate: Date,
   avatar: String,
   password: String,
   mail: String,

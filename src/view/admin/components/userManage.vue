@@ -5,19 +5,15 @@
         :data="userData"
         style="width: 100%; padding: 40px;">
         <el-table-column
-          prop="id"
-          label="编号">
-        </el-table-column>
-        <el-table-column
           prop="username"
           label="姓名">
         </el-table-column>
         <el-table-column
-          prop="registerDate"
+          prop="meta.createAt"
           label="注册日期">
         </el-table-column>
         <el-table-column
-          prop="email"
+          prop="mail"
           label="邮箱">
         </el-table-column>
         <el-table-column
@@ -39,16 +35,8 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="block">
-      <el-pagination
-        align="right"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="currentPage3"
-        :page-size="100"
-        layout="prev, pager, next, jumper"
-        :total="1000">
-      </el-pagination>
+    <div class="page">
+      <Page :total="total" @on-page-size-change="changePageSize" @on-change="changePage" :current="current" :page-size="pageSize" show-total show-elevator show-sizer />
     </div>
   </div>
 </template>
@@ -58,30 +46,46 @@
     name: "userManage",
     data() {
       return {
-        userData: []
+        userData: [],
+        total: 0,
+        current: 1,
+        pageSize: 10,
       }
     },
     created() {
-      this.getPost()
+      this.getUser()
     },
     methods: {
       handleLock(index, row) {
         console.log(index, row);
+        let b = (index, row)
+        this.remove(b._id)
       },
-      getPost() {
-        for(let i = 1; i <= 10; i++) {
-          this.userData.push(
-            {
-              registerDate: '2016-05-02',
-              username: `用户${i}`,
-              id: i,
-              email: `${i}@qq.com`,
-              phone:i,
-              birth: '2010-05-02'
-            }
-          )
+      changePage(index) {
+        this.current = index
+        this.getUser()
+      },
+      changePageSize(index) {
+        this.pageSize = index
+        this.getUser()
+      },
+      async getUser() {
+        let params = {type: 'manage', current: this.current, pageSize: this.pageSize};
+        const res = await this.$store.dispatch("userList", params)
+        if (res.data.status == 1000) {
+          this.userData = res.data.data
+          this.total = res.data.count
+        } else {
+          this.$Message.warning(res.data.message)
         }
-      }
+      },
+      async remove(id) {
+        let params = {id: id};
+        const res = await this.$store.dispatch("userLock", params)
+        if (res.data.status == 1000) {
+          this.getUser()
+        }
+      },
     }
   }
 </script>
@@ -95,8 +99,11 @@
       height: 80px;
       line-height: 80px;
     }
-    .block {
-      padding-right: 20px;
+    .page {
+      margin: 20px;
+      padding-bottom: 50px;
+      text-align: right;
+      line-height: 0;
     }
   }
 </style>

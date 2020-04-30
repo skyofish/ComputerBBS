@@ -42,6 +42,11 @@ export default new Router({
           component: () => import('../view/user/components/chatRoom.vue')
         },
         {
+          path: 'chat',
+          name: 'chat',
+          component: () => import('../view/user/components/chat.vue')
+        },
+        {
           path: 'post',
           name: 'post',
           component: () => import('../view/user/components/post.vue')

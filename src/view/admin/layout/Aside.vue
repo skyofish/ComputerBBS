@@ -1,7 +1,6 @@
 <template>
     <div id="Aside">
       <div id="logo">
-        论坛logo
       </div>
       <el-row>
       <el-col>
@@ -33,7 +32,7 @@
              </router-link>
             </el-menu-item-group>
           </el-submenu>
-          <el-submenu index="3">
+          <el-submenu index="3" v-if="userInfo.type == 'admin'">
             <template slot="title">
               <i class="el-icon-s-custom"></i>
               <span>用户管理</span>
@@ -47,7 +46,7 @@
               </router-link>
             </el-menu-item-group>
           </el-submenu>
-          <el-menu-item index="4">
+          <el-menu-item index="4" v-if="userInfo.type == 'admin'">
             <router-link to="./makeAnnouncement">
               <i class="el-icon-bell"></i>
               发布公告
@@ -66,6 +65,7 @@
 </template>
 
 <script>
+    import { mapState } from  'vuex'
     export default {
       name: "Aside",
       methods: {
@@ -75,6 +75,11 @@
         handleClose(key, keyPath) {
           console.log(key, keyPath);
         }
+      },
+      computed: {
+        ...mapState({
+          userInfo: state => state.userInfo
+        })
       }
     }
 </script>
@@ -88,5 +93,7 @@
     width: 100%;
     height: 18%;
     line-height: 110px;
+    background: url("../../../../static/logo.jpg");
+    background-size: 100% 100%;
   }
 </style>

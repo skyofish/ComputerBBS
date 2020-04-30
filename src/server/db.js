@@ -11,6 +11,7 @@ const article = require('../models/article')
 const block = require('../models/block')
 const file = require('../models/file')
 const announcement = require('../models/announcement')
+const message = require('../models/message')
 
 
 const Models = {
@@ -18,7 +19,8 @@ const Models = {
   Article: article,
   Block: block,
   File: file,
-  Announcement: announcement
+  Announcement: announcement,
+  Message: message
 }
 
 module.exports = Models

@@ -2,7 +2,7 @@
     <div class="chatRoom">
       <p>多人聊天</p>
       <List>
-        <div v-for="i in chatRoom" class="roomList">
+        <div @click="toRoom(i.id)" v-for="i in chatRoom" class="roomList">
           <ListItem>
             <ListItemMeta :title="i.title" :description="i.description" />
           </ListItem>
@@ -33,6 +33,14 @@
                 }
               )
             }
+          },
+          toRoom(id) {
+            this.$router.push({
+              path: 'chat',
+              query: {
+                roomId: id,
+              }
+            });
           }
         }
     }

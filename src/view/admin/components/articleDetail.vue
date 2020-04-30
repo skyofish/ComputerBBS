@@ -1,5 +1,11 @@
 <template>
     <div class="articleDetail">
+    <div style="text-align: left;">
+      <Button style="background: #2d8cf0; border: 0; color: white" @click="back" size="large">
+        <Icon type="ios-arrow-back"/>
+        返回
+      </Button>
+    </div>
       <div style="background:#2d8cf0;padding: 20px">
         <Card>
           <p slot="title">{{article.title}}</p>
@@ -44,7 +50,12 @@
         },
         methods: {
           async getArticleDetail() {
-            let params = {articleId: this.articleId};
+            let params
+            if (this.$route.query.id) {
+              params = {articleId: this.$route.query.id};
+            } else {
+              params = {title: this.$route.query.title};
+            }
             const res = await this.$store.dispatch("getArticleDetail", params)
             if (res.data.status == 1000) {
               this.article = res.data.data
@@ -53,6 +64,10 @@
             }
           },
           async makeComment() {
+            if (!this.username) {
+              this.$Message.error('请登录')
+              return
+            }
             this.comment = this.comment.replace(`@${this.replyUsername}`," ");
             let params = {
               articleId: this.articleId,
@@ -79,6 +94,9 @@
           replyFor(name) {
             this.comment = `@${name}`
             this.replyUsername = name
+          },
+          back() {
+            this.$router.go(-1)
           }
         },
         computed: {

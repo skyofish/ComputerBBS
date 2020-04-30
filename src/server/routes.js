@@ -147,12 +147,12 @@ module.exports = app => {
   })
 
   app.post('/api/article/list', (req, res) => {
-    if (req.body.blockName) {
+    if (req.body.blockName && !req.body.myArticle) {
       models.Article.find({block: req.body.blockName, isCheck: true}).countDocuments(function(error, count) {
         if (error) {
           console.log(error)
         } else {
-          models.Article.find({block:req.body.blockName}, function (err, list) {
+          models.Article.find({isCheck: true, block:req.body.blockName}, function (err, list) {
             if (err) {
               res.send({'status': 1002, 'message': '查询失败', 'data': err})
             } else {
@@ -162,7 +162,7 @@ module.exports = app => {
                 res.send({'status': 1000, 'message': '查询成功', 'data': list, 'count': count})
               }
             }
-          }).skip((req.body.current-1)*req.body.pageSize).limit(req.body.pageSize)
+          }).sort({"isTop":-1}).skip((req.body.current-1)*req.body.pageSize).limit(req.body.pageSize)
         }
       })
     } else if (req.body.operate == 'hot') {
@@ -198,16 +198,16 @@ module.exports = app => {
     } else if (req.body.user == 'moderator' && req.body.operate == 'manage') {
       models.Block.find({moderator:{$elemMatch:{$eq:req.body.username}}}, function (err1, list1) {
         if (err1) {
-          res.send({'status': 1002, 'message': '查询失败', 'data': err})
+          res.send({'status': 1002, 'message': '查询失败', 'data': err1})
         }
         if (list1.length == 0) {
           res.send({'status': 1004, 'message': '未查找到版块'})
         } else {
-          models.Article.find({isCheck: true, block: list1.blockName}).countDocuments(function(error, count) {
+          models.Article.find({isCheck: true, block: list1[0].blockName}).countDocuments(function(error, count) {
             if (error) {
               console.log(error)
             } else {
-              models.Article.find({isCheck: true, block: list1.blockName}, function (err, list) {
+              models.Article.find({isCheck: true, block: list1[0].blockName}, function (err, list) {
                 if (err) {
                   res.send({'status': 1002, 'message': '查询失败', 'data': err})
                 } else {
@@ -243,16 +243,16 @@ module.exports = app => {
     } else if (req.body.user == 'moderator' && req.body.operate == 'check') {
       models.Block.find({moderator:{$elemMatch:{$eq:req.body.username}}}, function (err1, list1) {
         if (err1) {
-          res.send({'status': 1002, 'message': '查询失败', 'data': err})
+          res.send({'status': 1002, 'message': '查询失败', 'data': err1})
         }
         if (list1.length == 0) {
           res.send({'status': 1004, 'message': '未查找到版块'})
         } else {
-          models.Article.find({isCheck: false, block: list1.blockName}).countDocuments(function(error, count) {
+          models.Article.find({isCheck: false, block: list1[0].blockName}).countDocuments(function(error, count) {
             if (error) {
               console.log(error)
             } else {
-              models.Article.find({isCheck: false, block: list1.blockName}, function (err, list) {
+              models.Article.find({isCheck: false, block: list1[0].blockName}, function (err, list) {
                 if (err) {
                   res.send({'status': 1002, 'message': '查询失败', 'data': err})
                 } else {
@@ -267,17 +267,45 @@ module.exports = app => {
           })
         }
       })
+    } else if (req.body.myArticle == true) {
+      models.Article.find({ author: req.body.username}).countDocuments(function(error, count) {
+        if (error) {
+          console.log(error)
+        } else {
+          models.Article.find({author: req.body.username}, function (err, list) {
+            if (err) {
+              res.send({'status': 1002, 'message': '查询失败', 'data': err})
+            } else {
+              if(list.length == 0) {
+                res.send({'status': 1004, 'message': '未查询到任何文章'})
+              } else {
+                res.send({'status': 1000, 'message': '查询成功', 'data': list, 'count': count})
+              }
+            }
+          }).skip((req.body.current-1)*req.body.pageSize).limit(req.body.pageSize)
+        }
+      })
     }
   })
 
   app.post('/api/article/detail', (req, res) => {
-    models.Article.findOne({_id: req.body.articleId}, function (err, rs) {
-      if (err) {
-        res.send({'status': 1002, 'message': '查询失败', 'data': err})
-      } else {
-        res.send({'status': 1000, 'message': '查询成功', 'data': rs})
-      }
-    })
+    if (req.body.articleId) {
+      models.Article.findOne({_id: req.body.articleId}, function (err, rs) {
+        if (err) {
+          res.send({'status': 1002, 'message': '查询失败', 'data': err})
+        } else {
+          res.send({'status': 1000, 'message': '查询成功', 'data': rs})
+        }
+      })
+    } else if (req.body.title) {
+      models.Article.findOne({title: {$regex: req.body.title}}, function (err, rs) {
+        if (err) {
+          res.send({'status': 1002, 'message': '查询失败', 'data': err})
+        } else {
+          res.send({'status': 1000, 'message': '查询成功', 'data': rs})
+        }
+      })
+    }
   })
 
   app.post('/api/article/comment', (req, res) => {
@@ -353,42 +381,151 @@ module.exports = app => {
   })
 
   app.post('/api/makeAnnouncement', (req, res) => {
-
+    let newAnnouncement = new models.Announcement({
+      content: req.body.content
+    })
+    newAnnouncement.save((err, data) => {
+      res.send({'status': 1000, 'message': '发布成功!', 'data': data})
+    })
   })
 
   app.get('/api/getAnnouncement', (req, res) => {
-
+    models.Announcement.find({}, (err, list) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '获取成功!', 'data': list})
+      }
+    })
   })
 
   app.post('/api/article/elite', (req, res) => {
-
+    models.Article.updateOne({_id: req.body.articleId}, {$set: {isElite: true}}, function (err, rs) {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '加精!'});
+      }
+    })
   })
 
   app.post('/api/article/top', (req, res) => {
-
+    models.Article.updateOne({_id: req.body.articleId}, {$set: {isTop: true}}, function (err, rs) {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '置顶!'});
+      }
+    })
   })
 
   app.post('/api/article/remove', (req, res) => {
-
+    models.Article.deleteOne({_id: req.body.articleId}, function (err, rs) {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '移除成功!'});
+      }
+    })
   })
 
   app.post('/api/article/check', (req, res) => {
-
+    models.Article.updateOne({_id: req.body.articleId}, {$set: {isCheck: true}}, function (err, rs) {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '审核通过!'});
+      }
+    })
   })
 
   app.post('/api/user/list', (req, res) => {
-
+    if (req.body.type == 'check') {
+      models.User.find({isModerator: true}).countDocuments(function (error, count) {
+        if (error) {
+          res.send({'status': 1002, 'message': '查询失败', 'data': error})
+        } else {
+          models.User.find({isModerator: true}, function (err, list) {
+            if (err) {
+              res.send({'status': 1002, 'message': '查询失败', 'data': err})
+            }
+            if (list.length == 0) {
+              res.send({'status': 1004, 'message': '未查找到用户信息'})
+            } else {
+              res.send({'status': 1000, 'message': '查询成功', 'data': list, 'count': count})
+            }
+          }).skip((req.body.current-1)*req.body.pageSize).limit(req.body.pageSize)
+        }
+      })
+    } else {
+      models.User.find({type: {$in: ['user', 'moderator']}}).countDocuments(function (error, count) {
+        if (error) {
+          res.send({'status': 1002, 'message': '查询失败', 'data': error})
+        } else {
+          models.User.find({type: {$in: ['user', 'moderator']}}, function (err, list) {
+            if (err) {
+              res.send({'status': 1002, 'message': '查询失败', 'data': err})
+            }
+            if (list.length == 0) {
+              res.send({'status': 1004, 'message': '未查找到用户信息'})
+            } else {
+              res.send({'status': 1000, 'message': '查询成功', 'data': list, 'count': count})
+            }
+          }).skip((req.body.current-1)*req.body.pageSize).limit(req.body.pageSize)
+        }
+      })
+    }
   })
 
   app.post('/api/user/lock', (req, res) => {
+    models.User.deleteOne({_id: req.body.id}, (err, rs) => {
+      res.send({'status': 1000, 'message': '封禁成功!'});
+    })
+  })
 
+  app.post('/api/user/moderator', (req, res) => {
+    models.User.updateOne({_id: req.body.id},{$set: {isModerator: true,  moderatorBlock: req.body.block, moderatorReason: req.body.reason, moderatorDate: Date.now()}}, (err, rs) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '申请成功!'});
+      }
+    })
   })
 
   app.post('/api/user/moderatorSuccess', (req, res) => {
-
+    models.User.updateOne({_id: req.body.id},{$set: {type: 'moderator', isModerator: false}}, (err1, rs1) => {
+      if (err1) {
+        console.log(err1)
+      } else {
+        models.Block.updateOne({name: req.body.block},{$push: {'moderator': req.body.username}}, function (err2, rs2) {
+          if (err2) {
+            console.log(err2)
+          } else {
+            res.send({'status': 1000, 'message': '审核成功', 'data': rs2})
+          }
+        })
+      }
+    })
   })
 
   app.post('/api/user/moderatorFail', (req, res) => {
+    models.User.updateOne({_id: req.body.id},{$set: {isModerator: false, moderatorBlock: '', moderatorReason: '', moderatorDate: ''}}, (err, rs) => {
+      if (err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '驳回成功!'});
+      }
+    })
+  })
 
+  app.get('/api/message',function (req, res) {
+   models.Message.find({}, function (err, message) {
+      if(err) {
+        console.log(err)
+      } else {
+        res.send({'status': 1000, 'message': '接收成功', 'data': message})
+      }
+    })
   })
 }
